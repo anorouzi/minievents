@@ -39,8 +39,9 @@ Just run from the project root directory:
 
 This command will use *mininet/minievents.json* as event source file.
 The events define a UDP and TCP streams starting at second 2, and the link between h1 and s1
-is modified at second 5 (10 Mbps bandwidth), at second 10 (100 Mbps bandwidth), second 15 (100 % loss)
-and second 17 (0% loss and 1 Mbps bandwidth). The network is stopped at second 30.
+is modified at second 5 (50 Mbps bandwidth), at second 10 (100 Mbps bandwidth and 100 ms delay), 
+second 15 (100 % loss) and second 20 (0% loss and 500 Mbps bandwidth). The network is stopped at
+second 30.
  
 #### Check results
 Next Graphs are generated with data extracted from iperf output:
