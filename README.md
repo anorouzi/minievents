@@ -1,11 +1,9 @@
-Mininet: Rapid Prototyping for Software Defined Networks
+Minievents: A mininet Framework to define events in mininet networks
 ========================================================
 
-*The best way to emulate almost any network on your laptop!*
+Minievents 2.2.0
 
-Mininet 2.2.0
-
-### What is Mininet?
+## What is Mininet?
 
 Mininet emulates a complete network of hosts, links, and switches
 on a single machine.  To create a sample two-host, one-switch network,
@@ -18,136 +16,69 @@ especially those using OpenFlow and SDN.  OpenFlow-based network
 controllers prototyped in Mininet can usually be transferred to
 hardware with minimal changes for full line-rate execution.
 
-### How does it work?
+## What is Minievents?
 
-Mininet creates virtual networks using process-based virtualization
-and network namespaces - features that are available in recent Linux
-kernels.  In Mininet, hosts are emulated as `bash` processes running in
-a network namespace, so any code that would normally run on a Linux
-server (like a web server or client program) should run just fine
-within a Mininet "Host".  The Mininet "Host" will have its own private
-network interface and can only see its own processes.  Switches in
-Mininet are software-based switches like Open vSwitch or the OpenFlow
-reference switch.  Links are virtual ethernet pairs, which live in the
-Linux kernel and connect our emulated switches to emulated hosts
-(processes).
+Minievents is a Framework build over Mininet to introduce an event generator.
+Events are changes in a mininet network at specific times. 
 
-### Features
+Events in Minievents are defined in an external json document.
+Up to now the implemented events are TCP and UDP traffic (iperf) and link 
+properties modification (delay, bandwidth).
 
-Mininet includes:
+## How to use Minievents?
+Minievents is a child class of Mininet class. It adds events_file argument
+to specify the json event document. There is no Minievent CLI up to now.
 
-* A command-line launcher (`mn`) to instantiate networks.
+### Simple Example
 
-* A handy Python API for creating networks of varying sizes and
-  topologies.
+The __main__ of the minievents.py provides a simple example of Minievents framework.
+It is a single switch topology with two host.
+Just run from the project root directory:
 
-* Examples (in the `examples/` directory) to help you get started.
+  `sudo python mininet/minievents.py`
 
-* Full API documentation via Python `help()` docstrings, as well as
-  the ability to generate PDF/HTML documentation with `make doc`.
+This command will use *mininet/minievents.json* as event source file.
+The events define a UDP and TCP streams starting at second 2, and the link between h1 and s1
+is modified at second 5 (10 Mbps bandwidth), at second 10 (100 Mbps bandwidth), second 15 (100 % loss)
+and second 17 (0% loss and 1 Mbps bandwidth). The network is stopped at second 30.
+ 
+#### Check results
+Next Graphs are generated with data extracted from iperf output:
+![iperf TCP bandwidth](https://raw.githubusercontent.com/cgiraldo/minievents/master/output/tcp-bw.png)
 
-* Parametrized topologies (`Topo` subclasses) using the Mininet
-  object.  For example, a tree network may be created with the
-  command:
+## Json event file format and events
+The minievents.json is an example of the json definition of events for minievents 
+Framework. The file should be an array of Json objets (the events) with the following members:
 
-  `mn --topo tree,depth=2,fanout=3`
+* time: time in seconds since launch when the event should happen.
+* type: event type. Up to now, the following event types are present
+  * iperf: data traffic generator
+  * editLink: edit Link properties.
+  * stop: stop the network
+* params: parameters for the event.
 
-* A command-line interface (`CLI` class) which provides useful
-  diagnostic commands (like `iperf` and `ping`), as well as the
-  ability to run a command to a node. For example,
+The events are:
 
-  `mininet> h11 ifconfig -a`
+The *editLink* event modifies the properties of a link and takes the next parameters:
+* src: name of the source node of the link
+* dst: name of the destination node of the link.
+* loss: percentage of packet loss in the link
+* bw: link bandwidth in Mbits/sec
+* delay: in milliseconds
+* (...) It should work with any of the config parameters of the Mininet TCIntf class.
 
-  tells host h11 to run the command `ifconfig -a`
+The *iperf* event  creates a traffic stream between two hosts (TCP or UDP) and takes the next parameters:
+* src: name of the source node
+* dst: name of the destination node
+* protocol: L4 protocol, should be TCP (default) or UDP.
+* duration: duration of the traffic stream in seconds.
+* bw (for UDP only): transmission in bits/sec.
+The *iperf* client and server process outputs to the files:
+`output/iperf-{TCP-UDP}-{client|server}-{src}-{dst}.txt`
 
-* A "cleanup" command to get rid of junk (interfaces, processes, files
-  in /tmp, etc.) which might be left around by Mininet or Linux. Try
-  this if things stop working!
+## Authoring
 
-  `mn -c`
-
-### New features in this release
-
-This release provides a number of bug fixes as well as
-several new features, including:
-
-* Improved OpenFlow 1.3 support
-
-	- `mn --switch ovs,protocols=openflow13` starts OVS in 1.3 mode
-	- `install.sh -w` installs a 1.3-compatible Wireshark dissector using
-	  Loxigen
-	- `install.sh -y` installs the Ryu 1.3-compatible controller
-
-* A new `nodelib.py` node library, and new `Node` types including
-  `LinuxBridge`, `OVSBridge`, `LinuxRouter` (see `examples/`)
-  and `NAT`
-
-* A `--nat` option which connects a Mininet network to your LAN using NAT
-  (For this to work correctly, Mininet's `--ipbase` subnet should not 
-  overlap with any external or internet IP addresses you wish to use)
-
-* An improved MiniEdit GUI (`examples/miniedit.py`) - thanks to
-  Gregory Gee
-
-* Support for multiple `--custom` arguments to `mn`
-
-* Experimental cluster support - consult the 
-  [documentation](http://docs.mininet.org) for details -
-  as well as `examples/cluster.py` and an experimental `--cluster`
-  option for topologies built with the default `Host` and `OVSSwitch`
-  classes:
-
-  `mn --cluster localhost,server1,server2`
-
-Note that examples contain experimental features which might
-"graduate" into mainline Mininet in the future, but they should 
-not be considered a stable part of the Mininet API!
-
-A number of bugs have also been fixed, most notably multiple link
-support in `Topo()`. See github issues and the release notes on
-the Mininet wiki for additional information.
-
-### Installation
-
-See `INSTALL` for installation instructions and details.
-
-### Documentation
-
-In addition to the API documentation (`make doc`), much useful
-information, including a Mininet walkthrough and an introduction
-to the Python API, is available on the
-[Mininet Web Site](http://mininet.org).
-There is also a wiki which you are encouraged to read and to
-contribute to, particularly the Frequently Asked Questions (FAQ.)
-
-### Support
-
-Mininet is community-supported. We encourage you to join the
-Mininet mailing list, `mininet-discuss` at:
-
-<https://mailman.stanford.edu/mailman/listinfo/mininet-discuss>
-
-### Join Us
-
-Mininet is an open source project and is currently hosted
-at <https://github.com/mininet>.  You are encouraged to download
-the code, examine it, modify it, and submit bug reports, bug fixes,
-feature requests, new features and other issues and pull requests.
-Thanks to everyone who has contributed code to the Mininet project
-(see CONTRIBUTORS for more info!) It is because of everyone's
-hard work that Mininet continues to grow and improve.
-
-### Enjoy Mininet
-
-Best wishes, and we look forward to seeing what you can do with
-Mininet to change the networking world!
-
-The Mininet Core Team:
-
-* Bob Lantz
-* Brian O'Connor
-* Cody Burkard
-
-Thanks again to all of the Mininet contributors, particularly Gregory
-Gee for his work on MiniEdit.
+*Carlos Giraldo
+AtlantTIC Research Center, University of Vigo, Spain
+http://atlanttic.uvigo.es/en/
 
