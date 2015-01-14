@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Minievents by cgiraldo</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Minievents</h1>
+          <h2>Minievents is a Framework build over Mininet to introduce an event generator. Events are changes in a mininet network at specific times.</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/cgiraldo/minievents/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/cgiraldo/minievents/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/cgiraldo/minievents" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="minievents-a-mininet-framework-to-define-events-in-mininet-networks" class="anchor" href="#minievents-a-mininet-framework-to-define-events-in-mininet-networks" aria-hidden="true"><span class="octicon octicon-link"></span></a>Minievents: A mininet Framework to define events in mininet networks</h1>
+
+<p>Minievents 2.2.0</p>
+
+<h2>
+<a id="what-is-mininet" class="anchor" href="#what-is-mininet" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is Mininet?</h2>
+
+<p>Mininet emulates a complete network of hosts, links, and switches
+on a single machine.  To create a sample two-host, one-switch network,
+just run:</p>
+
+<p><code>sudo mn</code></p>
+
+<p>Mininet is useful for interactive development, testing, and demos,
+especially those using OpenFlow and SDN.  OpenFlow-based network
+controllers prototyped in Mininet can usually be transferred to
+hardware with minimal changes for full line-rate execution.</p>
+
+<h2>
+<a id="what-is-minievents" class="anchor" href="#what-is-minievents" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is Minievents?</h2>
+
+<p>Minievents is a Framework build over Mininet to introduce an event generator.
+Events are changes in a mininet network at specific times. </p>
+
+<p>Events in Minievents are defined in an external json document.
+Up to now the implemented events are TCP and UDP traffic (iperf) and link 
+properties modification (delay, bandwidth).</p>
+
+<h2>
+<a id="how-to-use-minievents" class="anchor" href="#how-to-use-minievents" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use Minievents?</h2>
+
+<p>Minievents is a child class of Mininet class. It adds events_file argument
+to specify the json event document. There is no Minievent CLI up to now.</p>
+
+<h3>
+<a id="simple-example" class="anchor" href="#simple-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Simple Example</h3>
+
+<p>The <strong>main</strong> of the minievents.py provides a simple example of Minievents framework.
+It is a single switch topology with two host.
+Just run from the project root directory:</p>
+
+<p><code>sudo python mininet/minievents.py</code></p>
+
+<p>This command will use <em>mininet/minievents.json</em> as event source file.
+The events define a UDP and TCP streams starting at second 2, and the link between h1 and s1
+is modified at second 5 (50 Mbps bandwidth), at second 10 (100 Mbps bandwidth and 100 ms delay), 
+second 15 (100 % loss) and second 20 (0% loss and 500 Mbps bandwidth). The network is stopped at
+second 30.</p>
+
+<h4>
+<a id="check-results" class="anchor" href="#check-results" aria-hidden="true"><span class="octicon octicon-link"></span></a>Check results</h4>
+
+<p>Next Graphs are generated with data extracted from iperf output:
+<img src="https://raw.githubusercontent.com/cgiraldo/minievents/master/output/tcp-bw.png" alt="iperf TCP bandwidth"></p>
+
+<h2>
+<a id="json-event-file-format-and-events" class="anchor" href="#json-event-file-format-and-events" aria-hidden="true"><span class="octicon octicon-link"></span></a>Json event file format and events</h2>
+
+<p>The minievents.json is an example of the json definition of events for minievents 
+Framework. The file should be an array of Json objets (the events) with the following members:</p>
+
+<ul>
+<li>time: time in seconds since launch when the event should happen.</li>
+<li>type: event type. Up to now, the following event types are present
+
+<ul>
+<li>iperf: data traffic generator</li>
+<li>editLink: edit Link properties.</li>
+<li>stop: stop the network</li>
+</ul>
+</li>
+<li>params: parameters for the event.</li>
+</ul>
+
+<p>The events are:</p>
+
+<p>The <em>editLink</em> event modifies the properties of a link and takes the next parameters:</p>
+
+<ul>
+<li>src: name of the source node of the link</li>
+<li>dst: name of the destination node of the link.</li>
+<li>loss: percentage of packet loss in the link</li>
+<li>bw: link bandwidth in Mbits/sec</li>
+<li>delay: in milliseconds</li>
+<li>(...) It should work with any of the config parameters of the Mininet TCIntf class.</li>
+</ul>
+
+<p>The <em>iperf</em> event  creates a traffic stream between two hosts (TCP or UDP) and takes the next parameters:</p>
+
+<ul>
+<li>src: name of the source node</li>
+<li>dst: name of the destination node</li>
+<li>protocol: L4 protocol, should be TCP (default) or UDP.</li>
+<li>duration: duration of the traffic stream in seconds.</li>
+<li>bw (for UDP only): transmission in bits/sec.
+The <em>iperf</em> client and server process outputs to the files:
+<code>output/iperf-{TCP-UDP}-{client|server}-{src}-{dst}.txt</code>
+</li>
+</ul>
+
+<h2>
+<a id="authoring" class="anchor" href="#authoring" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authoring</h2>
+
+<p>*Carlos Giraldo
+AtlantTIC Research Center, University of Vigo, Spain
+<a href="http://atlanttic.uvigo.es/en/">http://atlanttic.uvigo.es/en/</a></p>
+        </section>
+
+        <footer>
+          Minievents is maintained by <a href="https://github.com/cgiraldo">cgiraldo</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
