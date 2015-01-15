@@ -74,12 +74,13 @@ The *iperf* event  creates a traffic stream between two hosts (TCP or UDP) and t
 * protocol: L4 protocol, should be TCP (default) or UDP.
 * duration: duration of the traffic stream in seconds.
 * bw (for UDP only): transmission in bits/sec.
+
 The *iperf* client and server process outputs to the files:
 `output/iperf-{TCP-UDP}-{client|server}-{src}-{dst}.txt`
 
 ## Authoring
 
-*Carlos Giraldo
+* Carlos Giraldo
 AtlantTIC Research Center, University of Vigo, Spain
 http://atlanttic.uvigo.es/en/
 
