@@ -50,7 +50,7 @@ class Minievents(Mininet):
 
     def load_events(self, json_events):
         # event type to function correspondence
-        event_type_to_f = {'editLink': self.editLink, 'iperf': self.iperf, 'stop': self.stop}
+        event_type_to_f = {'editLink': self.editLink, 'iperf': self.iperf, 'ping': self.ping, 'stop': self.stop}
         for event in json_events:
             debug("processing event: time {time}, type {type}, params {params}\n".format(**event))
             event_type = event['type']
@@ -152,6 +152,35 @@ class Minievents(Mininet):
         # This is a patch to allow sendingCmd while iperf is running in background.CONS: we can not know when
         # iperf finishes and get their output
         client.waiting = False
+
+    def ping(self, **kwargs):
+        """
+        Command to send pings between src and dst.
+        :param kwargs: named arguments
+            src: name of the source node.
+            dst: name of the destination node.
+            interval: time between ping packet transmissions.
+            count: number of ping packets.
+        """
+        kwargs.setdefault('count', 3)
+        kwargs.setdefault('interval', 1.0)
+        info('***ping event at t={time}: {args}\n'.format(time=time.time(), args=kwargs))
+        
+        if not os.path.exists("output"):
+            os.makedirs("output")
+        output = "output/ping-{src}-{dst}.txt".format(**kwargs)
+        info('output filename: {output}\n'.format(output=output))
+
+        src, dst = self.get(kwargs['src'], kwargs['dst'])
+        ping_cmd = 'ping -c {count} -i {interval} {dst_ip}'.format(dst_ip=dst.IP(), **kwargs)
+
+        info('ping command: {cmd} &>{output} &\n'.format(
+            cmd = ping_cmd, output=output))
+        src.sendCmd('{cmd} &>{output} &'.format(
+            cmd = ping_cmd, output=output))
+        # This is a patch to allow sendingCmd while ping is running in background.CONS: we can not know when
+        # ping finishes and get its output
+        src.waiting = False
 
     def start(self):
         super(Minievents, self).start()

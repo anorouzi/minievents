@@ -29,6 +29,15 @@
     }
   },
   {
+    "time": 4,
+    "type": "ping",
+    "params": {
+      "src": "h2",
+      "dst": "h1",
+      "count": 12
+    }
+  },
+  {
     "time": 5,
     "type": "editLink",
     "params": {
